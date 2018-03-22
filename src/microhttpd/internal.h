@@ -1642,6 +1642,11 @@ struct MHD_Daemon
    */
   const char *https_mem_trust;
 
+  /**
+   * Pointer to our SSL/TLS certificate revocation list (in ASCII) in memory.
+   */
+  const char *https_mem_crl;
+
 #endif /* HTTPS_SUPPORT */
 
 #ifdef DAUTH_SUPPORT

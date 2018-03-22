@@ -297,6 +297,24 @@ MHD_TLS_set_context_client_certificate_mode (struct MHD_TLS_Context *context,
 }
 
 bool
+MHD_TLS_set_context_certificate_revocation_list (struct MHD_TLS_Context *context,
+                                                 const char *crl)
+{
+  if (NULL == context)
+    return false;
+
+  if (NULL == crl)
+    {
+      MHD_TLS_LOG_CONTEXT (context,
+                           _("Invalid certificate revocation list\n"));
+      return false;
+    }
+
+  return context->engine->set_context_certificate_revocation_list(context,
+                                                                  crl);
+}
+
+bool
 MHD_TLS_set_context_cipher_priorities (struct MHD_TLS_Context *context,
                                        const char *priorities)
 {

@@ -499,6 +499,20 @@ MHD_init_daemon_certificate (struct MHD_Daemon *daemon)
         return -1;
     }
 
+  /* certificate revocation list from memory */
+  if (NULL != daemon->https_mem_crl)
+    {
+      if (NULL == daemon->https_mem_trust)
+        {
+          MHD_DLOG (daemon,
+                    "You need to specify a CA certificate for client authentication to be able to use CRLs\n");
+          return -1;
+        }
+      if (!MHD_TLS_set_context_certificate_revocation_list (daemon->tls_context,
+                                                            daemon->https_mem_crl))
+        return -1;
+    }
+
   /* certificate & key loaded from memory */
   if ( (NULL != daemon->https_mem_cert) &&
        (NULL != daemon->https_mem_key) )
@@ -4933,6 +4947,14 @@ parse_options_va (struct MHD_Daemon *daemon,
           daemon->cert_callback = va_arg (ap,
                                           MHD_TLS_GetCertificateCallback);
           break;
+        case MHD_OPTION_TLS_MEM_CRL:
+          if (0 == (daemon->options & MHD_USE_TLS))
+            return MHD_YES;
+          if (!MHD_setup_tls_context (daemon))
+            return MHD_NO;
+          daemon->https_mem_crl = va_arg (ap,
+                                          const char *);
+          break;
 #endif /* HTTPS_SUPPORT */
 #ifdef DAUTH_SUPPORT
 	case MHD_OPTION_DIGEST_AUTH_RANDOM:
@@ -5089,6 +5111,7 @@ parse_options_va (struct MHD_Daemon *daemon,
 	        case MHD_OPTION_HTTPS_MEM_DHPARAMS:
 		case MHD_OPTION_HTTPS_PRIORITIES:
 		case MHD_OPTION_TLS_PRIORITIES:
+		case MHD_OPTION_TLS_MEM_CRL:
 		case MHD_OPTION_ARRAY:
  		case MHD_OPTION_HTTPS_CERT_CALLBACK:
  		case MHD_OPTION_TLS_CERT_CALLBACK:

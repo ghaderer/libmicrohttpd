@@ -334,6 +334,16 @@ MHD_TLS_gnutls_set_context_client_certificate_mode (struct MHD_TLS_Context *cont
 }
 
 static bool
+MHD_TLS_gnutls_set_context_certificate_revocation_list (struct MHD_TLS_Context *context,
+                                                        const char *crl)
+{
+  MHD_TLS_LOG_CONTEXT (context,
+                       _("Setting CRL for GnuTLS not implemented yet\n"));
+
+  return false;
+}
+
+static bool
 MHD_TLS_gnutls_set_context_cipher_priorities (struct MHD_TLS_Context *context,
                                               const char *priorities)
 {
@@ -635,6 +645,7 @@ const struct MHD_TLS_Engine tls_engine_gnutls =
   MHD_TLS_gnutls_set_context_certificate,
   MHD_TLS_gnutls_set_context_trust_certificate,
   MHD_TLS_gnutls_set_context_client_certificate_mode,
+  MHD_TLS_gnutls_set_context_certificate_revocation_list,
   MHD_TLS_gnutls_set_context_cipher_priorities,
   MHD_TLS_gnutls_init_session,
   MHD_TLS_gnutls_deinit_session,

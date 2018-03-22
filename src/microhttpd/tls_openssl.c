@@ -646,6 +646,69 @@ MHD_TLS_openssl_set_context_client_certificate_mode (struct MHD_TLS_Context *con
 }
 
 static bool
+MHD_TLS_openssl_set_context_certificate_revocation_list (struct MHD_TLS_Context *context,
+                                                         const char *crl)
+{
+  bool result = false;
+  BIO *bio = NULL;
+  STACK_OF(X509_INFO) *info_sk = NULL;
+  X509_INFO *info;
+  int crl_count = 0;
+  int idx;
+
+  bio = BIO_new_mem_buf (crl, -1);
+  if (NULL != bio)
+    {
+      info_sk = PEM_X509_INFO_read_bio (bio, NULL, NULL, NULL);
+      BIO_free_all (bio);
+    }
+
+  if (NULL == info_sk)
+    {
+      MHD_TLS_LOG_CONTEXT (context,
+                           _("Bad certificate revocation list format\n"));
+      goto cleanup;
+    }
+
+  for (idx = 0; idx < sk_X509_INFO_num (info_sk); ++idx)
+    {
+      info = sk_X509_INFO_value (info_sk, idx);
+      if (NULL != info->crl)
+        {
+          if (!X509_STORE_add_crl (SSL_CTX_get_cert_store (context->d.openssl.context),
+                                                            info->crl))
+            {
+              MHD_TLS_LOG_CONTEXT (context,
+                                   _("Cannot add certificate revocation list to store\n"));
+              goto cleanup;
+            }
+          else
+            info->crl = NULL;
+
+          crl_count++;
+        }
+    }
+
+  if (crl_count == 0)
+    {
+      MHD_TLS_LOG_CONTEXT (context,
+                           _("No certificate revocation list found\n"));
+      goto cleanup;
+    }
+
+  X509_STORE_set_flags(SSL_CTX_get_cert_store (context->d.openssl.context),
+                                               X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
+
+  result = true;
+
+cleanup:
+  if (NULL != info_sk)
+    sk_X509_INFO_pop_free (info_sk, X509_INFO_free);
+
+  return result;
+}
+
+static bool
 MHD_TLS_openssl_set_context_cipher_priorities (struct MHD_TLS_Context *context,
                                                const char *priorities)
 {
@@ -1120,7 +1183,7 @@ MHD_TLS_openssl_session_handshake (struct MHD_TLS_Session * session)
 
       while (err_error != 0) {
         MHD_TLS_LOG_SESSION (session,
-                             _("Session handshake failed, SSL_accept: %d, ERR_get_error: %d\n\tlib: %s\n\tfunc: %s\n\treason: %s\n"),
+                             _("Session handshake failed, SSL_accept: %d, ERR_get_error: %lu\n\tlib: %s\n\tfunc: %s\n\treason: %s\n"),
                              result,
                              err_error,
                              ERR_lib_error_string(err_error),
@@ -1267,6 +1330,7 @@ const struct MHD_TLS_Engine tls_engine_openssl =
   MHD_TLS_openssl_set_context_certificate,
   MHD_TLS_openssl_set_context_trust_certificate,
   MHD_TLS_openssl_set_context_client_certificate_mode,
+  MHD_TLS_openssl_set_context_certificate_revocation_list,
   MHD_TLS_openssl_set_context_cipher_priorities,
   MHD_TLS_openssl_init_session,
   MHD_TLS_openssl_deinit_session,

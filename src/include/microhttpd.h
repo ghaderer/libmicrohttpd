@@ -1772,7 +1772,17 @@ enum MHD_OPTION
    * SSL_CTX_set_cert_cb(). It will receive the OpenSSL SSL session as its
    * first parameter. The second parameter will always be @c NULL.
    */
-    MHD_OPTION_TLS_CERT_CALLBACK = 32
+    MHD_OPTION_TLS_CERT_CALLBACK = 32,
+
+  /**
+   * Memory pointer to a `const char *` specifying the CRL (certificate
+   * revocation list) in PEM format for client authentication via certificates.
+   * This makes only sense if #MHD_OPTION_HTTPS_MEM_TRUST has been set also.
+   *
+   * For GnuTLS: not implemented yet!
+   *
+   */
+    MHD_OPTION_TLS_MEM_CRL = 33
 };
 
 /**

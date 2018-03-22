@@ -276,6 +276,19 @@ struct MHD_TLS_Engine
                                                enum MHD_TLS_ClientCertificateMode mode);
 
   /**
+   * @brief Set certificate revocation list for client certificate verification.
+   *
+   * @param context TLS context.
+   * @param crl Certificate revocation list in PEM format.
+   *
+   * @return @c true on success, @c false otherwise.
+   *
+   * @see #MHD_TLS_set_context_certificate_revocation_list
+   */
+  bool (*set_context_certificate_revocation_list) (struct MHD_TLS_Context *context,
+                                                   const char *crl);
+
+  /**
    * @brief Set the priorities to use on encyption, key exchange and MAC
    * algorithms.
    *
@@ -755,6 +768,22 @@ MHD_TLS_set_context_trust_certificate (struct MHD_TLS_Context *context,
 bool
 MHD_TLS_set_context_client_certificate_mode (struct MHD_TLS_Context *context,
                                              enum MHD_TLS_ClientCertificateMode mode);
+
+/**
+ * @brief Set the client certificate revocation list for client certificate verification.
+ *
+ * By default, client certificates are not checked for revocation. But you can provide
+ * a certificate revocation list (CRL) to explicitly make client certificate verification
+ * fail for specific certificates (revoke certificates).
+ *
+ * @param context TLS context.
+ * @param crl Certificate revocation list in PEM format.
+ *
+ * @return @c true on success, @c false otherwise.
+ */
+bool
+MHD_TLS_set_context_certificate_revocation_list (struct MHD_TLS_Context *context,
+                                                 const char *crl);
 
 /**
  * @brief Set the priorities to use on encyption, key exchange and MAC
