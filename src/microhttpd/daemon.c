@@ -493,9 +493,8 @@ MHD_init_daemon_certificate (struct MHD_Daemon *daemon)
                                                   daemon->https_mem_trust))
         return -1;
 
-      /** @todo Add an option to configure the mode. */
       if (!MHD_TLS_set_context_client_certificate_mode (daemon->tls_context,
-                                                        MHD_TLS_CLIENT_CERTIFICATE_MODE_REQUIRE))
+                                                        daemon->tls_client_certificate_mode))
         return -1;
     }
 
@@ -4815,6 +4814,7 @@ parse_options_va (struct MHD_Daemon *daemon,
             return MHD_NO;
           daemon->https_mem_trust = va_arg (ap,
                                             const char *);
+          daemon->tls_client_certificate_mode = MHD_TLS_CLIENT_CERTIFICATE_MODE_REQUIRE;
           break;
         case MHD_OPTION_HTTPS_CRED_TYPE:
 #ifdef ENABLE_GNUTLS
@@ -4955,6 +4955,14 @@ parse_options_va (struct MHD_Daemon *daemon,
           daemon->https_mem_crl = va_arg (ap,
                                           const char *);
           break;
+        case MHD_OPTION_TLS_CLIENT_CERTIFICATE_MODE:
+          if (0 == (daemon->options & MHD_USE_TLS))
+            return MHD_YES;
+          if (!MHD_setup_tls_context (daemon))
+            return MHD_NO;
+          daemon->tls_client_certificate_mode = va_arg (ap,
+                                                        enum MHD_TLS_ClientCertificateMode);
+        break;
 #endif /* HTTPS_SUPPORT */
 #ifdef DAUTH_SUPPORT
 	case MHD_OPTION_DIGEST_AUTH_RANDOM:
@@ -5081,6 +5089,14 @@ parse_options_va (struct MHD_Daemon *daemon,
                                                 servaddr,
                                                 opt,
                                                 (enum MHD_TLS_EngineType) oa[i].value,
+                                                MHD_OPTION_END))
+                    return MHD_NO;
+                  break;
+                case MHD_OPTION_TLS_CLIENT_CERTIFICATE_MODE:
+                  if (MHD_YES != parse_options (daemon,
+                                                servaddr,
+                                                opt,
+                                                (enum MHD_TLS_ClientCertificateMode) oa[i].value,
                                                 MHD_OPTION_END))
                     return MHD_NO;
                   break;
@@ -5419,6 +5435,7 @@ MHD_start_daemon_va (unsigned int flags,
     daemon->tls_engine_type = MHD_TLS_ENGINE_TYPE_OPENSSL;
   else
     daemon->tls_engine_type = MHD_TLS_ENGINE_TYPE_NONE;
+  daemon->tls_client_certificate_mode = MHD_TLS_CLIENT_CERTIFICATE_MODE_DISABLE;
 #endif /* HTTPS_SUPPORT */
   daemon->listen_fd = MHD_INVALID_SOCKET;
   daemon->listening_address_reuse = 0;

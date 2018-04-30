@@ -1105,6 +1105,32 @@ enum MHD_TLS_CipherAlgorithm
 };
 
 /**
+ * @brief TLS client certificate mode.
+ */
+enum MHD_TLS_ClientCertificateMode
+{
+  /**
+   * @brief Don't request a client certificate. This is the default.
+   */
+  MHD_TLS_CLIENT_CERTIFICATE_MODE_DISABLE = 0,
+
+  /**
+   * @brief Request a client certificate but don't require it.
+   */
+  MHD_TLS_CLIENT_CERTIFICATE_MODE_REQUEST = 1,
+
+  /**
+   * @brief Require a client certificate.
+   */
+  MHD_TLS_CLIENT_CERTIFICATE_MODE_REQUIRE = 2,
+
+  /**
+   * @brief Upper-bound value.
+   */
+  MHD_TLS_CLIENT_CERTIFICATE_MODE_MAX = MHD_TLS_CLIENT_CERTIFICATE_MODE_REQUIRE
+};
+
+/**
  * @brief Flags for the `struct MHD_Daemon`.
  *
  * Note that MHD will run automatically in background thread(s) only
@@ -1782,7 +1808,17 @@ enum MHD_OPTION
    * For GnuTLS: not implemented yet!
    *
    */
-    MHD_OPTION_TLS_MEM_CRL = 33
+    MHD_OPTION_TLS_MEM_CRL = 33,
+
+  /**
+   * Set the client certificate mode to use for HTTPS connections with client
+   * authentication via certificates. See #MHD_TLS_ClientCertificateMode for
+   * allowed values. This makes only sense if #MHD_OPTION_HTTPS_MEM_TRUST has
+   * been set also.
+   * Default is #MHD_TLS_CLIENT_CERTIFICATE_MODE_REQUIRE if #MHD_OPTION_HTTPS_MEM_TRUST
+   * has been set, otherwise MHD_TLS_CLIENT_CERTIFICATE_MODE_DISABLE.
+   */
+    MHD_OPTION_TLS_CLIENT_CERTIFICATE_MODE = 34
 };
 
 /**

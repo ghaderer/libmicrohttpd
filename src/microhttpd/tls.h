@@ -82,32 +82,6 @@ typedef ssize_t
                           size_t size);
 
 /**
- * @brief Client certificate mode.
- */
-enum MHD_TLS_ClientCertificateMode
-{
-  /**
-   * @brief Don't request a client certificate. This is the default.
-   */
-  MHD_TLS_CLIENT_CERTIFICATE_MODE_DISABLE = 0,
-
-  /**
-   * @brief Request a client certificate but don't require it.
-   */
-  MHD_TLS_CLIENT_CERTIFICATE_MODE_REQUEST = 1,
-
-  /**
-   * @brief Require a client certificate.
-   */
-  MHD_TLS_CLIENT_CERTIFICATE_MODE_REQUIRE = 2,
-
-  /**
-   * @brief Upper-bound value.
-   */
-  MHD_TLS_CLIENT_CERTIFICATE_MODE_MAX = MHD_TLS_CLIENT_CERTIFICATE_MODE_REQUIRE
-};
-
-/**
  * @name Special return values for session read/write functions.
  * @{
  */

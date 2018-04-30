@@ -1612,6 +1612,11 @@ struct MHD_Daemon
   enum MHD_TLS_EngineType tls_engine_type;
 
   /**
+   * @brief TLS client certificate mode to use.
+   */
+  enum MHD_TLS_ClientCertificateMode tls_client_certificate_mode;
+
+  /**
    * TLS context.
    */
   struct MHD_TLS_Context *tls_context;
